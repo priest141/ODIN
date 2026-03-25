@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # REVERSE PROXY (TRAEFIK)
+  # ==========================================
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      - "--api.insecure=true" # Provides a dashboard at port 8080
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"     # The main HTTP entry point for your network
+      - "8080:8080" # Traefik Dashboard (optional, lock down later)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Allows Traefik to listen to Docker
+
+  # ==========================================
+  # SPATIAL DATABASE
+  # ==========================================
+  db:
+    image: postgis/postgis:15-3.4
+    container_name: osint_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASS:-SuperSecretPassword123!}
+      POSTGRES_DB: ${DB_NAME:-osint_dashboard}
+    volumes:
+      - osint_pgdata:/var/lib/postgresql/data
+
+  # ==========================================
+  # C# API GATEWAY
+  # ==========================================
+  api:
+    image: ghcr.io/priest141/odin-api:latest
+    container_name: osint_api
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${DB_NAME:-osint_dashboard};Username=${DB_USER:-postgres};Password=${DB_PASS:-SuperSecretPassword123!}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`odin.local`) && PathPrefix(`/api`)"
+      - "traefik.http.services.api.loadbalancer.server.port=8080"
+
+  # ==========================================
+  # PYTHON HARDWARE WORKER
+  # ==========================================
+  worker:
+    image: ghcr.io/priest141/odin-worker:latest
+    container_name: osint_meshtastic_worker
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=${DB_NAME:-osint_dashboard}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASS=${DB_PASS:-SuperSecretPassword123!}
+      - RADIO_CONNECTION_TYPE=${RADIO_CONNECTION_TYPE:-serial}
+      - RADIO_PORT=${RADIO_PORT:-/dev/ttyUSB0}
+    devices:
+      - "${RADIO_PORT:-/dev/ttyUSB0}:${RADIO_PORT:-/dev/ttyUSB0}"
+
+  # ==========================================
+  # REACT FRONTEND DASHBOARD
+  # ==========================================
+  frontend:
+    image: ghcr.io/priest141/odin-frontend:latest
+    container_name: osint_frontend
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`odin.local`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+
+  # ==========================================
+  # AUTO-UPDATER (WATCHTOWER)
+  # ==========================================
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 300 --cleanup # Checks GHCR every 5 minutes and cleans up old images
+
+volumes:
+  osint_pgdata:
