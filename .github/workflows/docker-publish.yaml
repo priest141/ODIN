@@ -71,21 +71,21 @@ jobs:
           labels: ${{ steps.meta-worker.outputs.labels }}
 
       # --- 3. BUILD & PUSH: REACT FRONTEND ---
-      - name: Extract metadata for Frontend
-        id: meta-frontend
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
-          tags: |
-            type=raw,value=latest
-            type=sha,format=short
+      # - name: Extract metadata for Frontend
+      #   id: meta-frontend
+      #   uses: docker/metadata-action@v5
+      #   with:
+      #     images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
+      #     tags: |
+      #       type=raw,value=latest
+      #       type=sha,format=short
 
-      - name: Build and push Frontend image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./odin_Frontend
-          file: ./odin_Frontend/Dockerfile
+      # - name: Build and push Frontend image
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: ./odin_Frontend
+      #     file: ./odin_Frontend/Dockerfile
 
-          push: true
-          tags: ${{ steps.meta-frontend.outputs.tags }}
-          labels: ${{ steps.meta-frontend.outputs.labels }}
+      #     push: true
+      #     tags: ${{ steps.meta-frontend.outputs.tags }}
+      #     labels: ${{ steps.meta-frontend.outputs.labels }}
