@@ -64,8 +64,8 @@ jobs:
       - name: Build and push Worker image
         uses: docker/build-push-action@v5
         with:
-          context: ./odin.Worker
-          file: ./odin.Worker/Dockerfile
+          context: ./odin_Worker
+          file: ./odin_Worker/Dockerfile
           push: true
           tags: ${{ steps.meta-worker.outputs.tags }}
           labels: ${{ steps.meta-worker.outputs.labels }}
@@ -83,8 +83,9 @@ jobs:
       - name: Build and push Frontend image
         uses: docker/build-push-action@v5
         with:
-          context: ./odin.Frontend
-          file: ./odin.Frontend/Dockerfile
+          context: ./odin_Frontend
+          file: ./odin_Frontend/Dockerfile
+
           push: true
           tags: ${{ steps.meta-frontend.outputs.tags }}
           labels: ${{ steps.meta-frontend.outputs.labels }}
