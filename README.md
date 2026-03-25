@@ -45,16 +45,16 @@ docker logs -f osint_meshtastic_worker
 
 5. **Start the Frontend (Local Dev):**
 ```bash
-cd odin.Frontend
+cd odin_Frontend
 npm install
 npm run dev
 ```
 Dashboard available at: http://localhost:5173
 
 ## 📁 Project Structure
-- /odin.Api - C# .NET 10 REST endpoints.
-- /odin.Application - Business logic and interfaces.
-- /odin.Domain - Core C# entities and Enums.
-- /odin.Infrastructure - EF Core contexts and PostGIS integrations.
-- /odin.Worker - Python scripts for physical radio ingestion.
-- /odin.Frontend - React/Vite dashboard UI.
+- /odin_Api - C# .NET 10 REST endpoints.
+- /odin_Application - Business logic and interfaces.
+- /odin_Domain - Core C# entities and Enums.
+- /odin_Infrastructure - EF Core contexts and PostGIS integrations.
+- /odin_Worker - Python scripts for physical radio ingestion.
+- /odin_Frontend - React/Vite dashboard UI.

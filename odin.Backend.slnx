@@ -1,6 +1,0 @@
-<Solution>
-  <Project Path="odin.Api/odin.Api.csproj" />
-  <Project Path="odin.Application/odin.Application.csproj" />
-  <Project Path="odin.Domain/odin.Domain.csproj" />
-  <Project Path="odin.Infrastructure/odin.Infrastructure.csproj" />
-</Solution>
